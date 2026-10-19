@@ -1,0 +1,603 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101426">
+  <title>Mystery Detective</title>
+  <style>
+    :root {
+      --bg: #101426;
+      --panel: #191f35;
+      --panel2: #222a43;
+      --gold: #ffd166;
+      --text: #f4f5fb;
+      --muted: #aab3cb;
+      --green: #64e6a5;
+      --red: #ff7b87;
+      --border: #333d59;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 28px 16px 40px;
+      background:
+        radial-gradient(ellipse at top, #25294a 0%, var(--bg) 60%);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    button { font: inherit; }
+
+    .container { max-width: 850px; margin: auto; }
+
+    header { text-align: center; margin-bottom: 28px; }
+
+    .logo { font-size: 44px; }
+
+    h1 {
+      margin: 6px 0;
+      font-size: clamp(30px, 6vw, 46px);
+      letter-spacing: -1.5px;
+    }
+
+    h1 span { color: var(--gold); }
+
+    .subtitle { color: var(--muted); margin: 8px 0; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .stat-value {
+      margin-top: 5px;
+      font-size: 23px;
+      font-weight: 800;
+      color: var(--gold);
+    }
+
+    .progress-track {
+      height: 6px;
+      border-radius: 20px;
+      background: var(--panel2);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    #progress {
+      width: 0;
+      height: 100%;
+      background: var(--gold);
+      transition: width .3s;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: clamp(18px, 4vw, 30px);
+      margin-bottom: 18px;
+      box-shadow: 0 12px 35px #00000016;
+    }
+
+    .eyebrow {
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+    }
+
+    h2 { margin: 10px 0; font-size: 25px; }
+
+    p { line-height: 1.7; }
+
+    .story { color: #d6dbee; }
+
+    .clue {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 13px;
+      margin-top: 10px;
+      background: var(--panel2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .clue-icon { font-size: 22px; }
+
+    .clue p { margin: 0; font-size: 14px; }
+
+    .section-title {
+      margin: 24px 0 12px;
+      font-size: 17px;
+    }
+
+    .suspects {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .suspect {
+      min-width: 0;
+      text-align: left;
+      color: var(--text);
+      background: var(--panel2);
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 10px;
+      cursor: pointer;
+      transition: border-color .2s, transform .2s;
+    }
+
+    .suspect:hover:not(:disabled) {
+      border-color: var(--gold);
+      transform: translateY(-2px);
+    }
+
+    .suspect:focus-visible, button:focus-visible {
+      outline: 3px solid var(--gold);
+      outline-offset: 3px;
+    }
+
+    .suspect:disabled { cursor: default; opacity: .8; }
+
+    .suspect .avatar {
+      display: block;
+      font-size: 31px;
+      margin-bottom: 8px;
+    }
+
+    .suspect strong { display: block; overflow-wrap: anywhere; }
+
+    .suspect small {
+      display: block;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-top: 5px;
+    }
+
+    .suspect.correct {
+      border-color: var(--green);
+      background: #163a35;
+    }
+
+    .suspect.wrong {
+      border-color: var(--red);
+      background: #3d2534;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 11px;
+      padding: 12px 18px;
+      font-weight: 750;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+
+    .btn:hover { opacity: .88; }
+
+    .primary { background: var(--gold); color: #242033; }
+    .secondary { background: var(--panel2); color: var(--text); border: 1px solid var(--border); }
+
+    .feedback {
+      display: none;
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 12px;
+      line-height: 1.7;
+    }
+
+    .feedback.show { display: block; }
+    .feedback.good { background: #173c32; border: 1px solid #347c63; }
+    .feedback.bad { background: #402631; border: 1px solid #854451; }
+
+    .feedback strong { display: block; margin-bottom: 5px; }
+
+    .hidden { display: none !important; }
+
+    .welcome, .finished { text-align: center; padding: 35px 20px; }
+
+    .big-icon { font-size: 64px; }
+
+    .welcome p, .finished p { color: var(--muted); }
+
+    .rules {
+      text-align: left;
+      max-width: 420px;
+      margin: 24px auto;
+      padding: 18px 22px;
+      background: var(--panel2);
+      border-radius: 13px;
+      line-height: 2;
+    }
+
+    footer {
+      color: var(--muted);
+      text-align: center;
+      font-size: 12px;
+      margin-top: 26px;
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 20px 12px 30px; }
+      .stats { gap: 7px; }
+      .stat { padding: 11px 5px; }
+      .stat-value { font-size: 19px; }
+      .suspects { gap: 6px; }
+      .suspect { padding: 12px 7px; }
+      .suspect small { font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <div class="logo">🕵️</div>
+      <h1>Mystery <span>Detective</span></h1>
+      <p class="subtitle">Read the clues. Find the truth. Solve the mystery.</p>
+    </header>
+
+    <section id="welcome" class="card welcome">
+      <div class="big-icon">🔎</div>
+      <div class="eyebrow">Your investigation begins</div>
+      <h2>Are you ready, Detective?</h2>
+      <p>Three mysterious cases. Three chances to prove your skills.</p>
+      <div class="rules">
+        🗂️ Read the case and examine every clue.<br>
+        🧑‍🤝‍🧑 Choose the most likely suspect.<br>
+        💡 Use hints if you get stuck.<br>
+        ⭐ Earn 100 points for each correct answer.
+      </div>
+      <button class="btn primary" id="startBtn">Start Investigation →</button>
+    </section>
+
+    <section id="game" class="hidden">
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Case</div>
+          <div class="stat-value" id="caseStat">1 / 3</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Score</div>
+          <div class="stat-value" id="scoreStat">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Solved</div>
+          <div class="stat-value" id="solvedStat">0 / 3</div>
+        </div>
+      </div>
+
+      <div class="progress-track">
+        <div id="progress"></div>
+      </div>
+
+      <article class="card">
+        <div class="eyebrow" id="caseCategory">CASE FILE #01</div>
+        <h2 id="caseTitle"></h2>
+        <p class="story" id="caseStory"></p>
+
+        <h3 class="section-title">🧩 Evidence & Clues</h3>
+        <div id="clues"></div>
+
+        <h3 class="section-title">👥 Who is the culprit?</h3>
+        <div id="suspects" class="suspects"></div>
+
+        <div class="actions">
+          <button id="hintBtn" class="btn secondary">💡 Reveal Hint</button>
+          <button id="nextBtn" class="btn primary hidden">Next Case →</button>
+        </div>
+
+        <div id="hintBox" class="feedback show hidden"></div>
+        <div id="feedback" class="feedback" aria-live="polite"></div>
+      </article>
+    </section>
+
+    <section id="finished" class="card finished hidden">
+      <div class="big-icon" id="endIcon">🏆</div>
+      <div class="eyebrow">Investigation complete</div>
+      <h2 id="endTitle">Case Closed!</h2>
+      <p id="endMessage"></p>
+      <div class="stat" style="max-width:220px;margin:22px auto">
+        <div class="stat-label">Final Score</div>
+        <div class="stat-value" id="finalScore">0 / 300</div>
+      </div>
+      <button class="btn primary" id="restartBtn">↻ Play Again</button>
+    </section>
+
+    <footer>
+      MYSTERY DETECTIVE · A logic game created with AI assistance
+    </footer>
+  </main>
+
+  <script>
+    "use strict";
+
+    const cases = [
+      {
+        title: "The Missing Trophy",
+        category: "CASE FILE #01 · SCHOOL MYSTERY",
+        story:
+          "The school's championship trophy disappeared from a locked display room between 3:00 PM and 3:15 PM. Only three students were near the room. One of them took the trophy.",
+        clues: [
+          "The room's access log records every person who enters.",
+          "Emma's access card was used at 2:40 PM. She left school at 2:50 PM.",
+          "Liam's access card was never used that afternoon.",
+          "Noah's access card opened the display room at 3:08 PM, shortly before the trophy was reported missing."
+        ],
+        suspects: [
+          { name: "Emma", icon: "👩‍🎓", detail: "Left school at 2:50 PM" },
+          { name: "Liam", icon: "🧑‍💻", detail: "No access record" },
+          { name: "Noah", icon: "🧢", detail: "Entered at 3:08 PM" }
+        ],
+        answer: "Noah",
+        hint:
+          "Focus on the access log and compare each person's recorded activity with the time the trophy disappeared.",
+        explanation:
+          "Noah is the only suspect whose access card opened the display room during the time window. The access log directly connects him to the room shortly before the theft was discovered."
+      },
+      {
+        title: "The Stolen Painting",
+        category: "CASE FILE #02 · ART GALLERY",
+        story:
+          "A valuable painting vanished from a small gallery during an afternoon event. The gallery's only exit was monitored, and the security guard recorded everyone carrying a large object out of the building.",
+        clues: [
+          "The painting was confirmed missing at 2:20 PM.",
+          "Olivia left at 2:05 PM carrying only a small handbag.",
+          "Marcus left at 2:12 PM carrying a long, flat package large enough to hold the painting.",
+          "Sophie stayed in the gallery until the painting was discovered missing. The guard confirmed that she did not leave the building."
+        ],
+        suspects: [
+          { name: "Olivia", icon: "👩‍🎨", detail: "Left at 2:05 PM" },
+          { name: "Marcus", icon: "🧥", detail: "Left with a large package" },
+          { name: "Sophie", icon: "👩‍💼", detail: "Stayed inside" }
+        ],
+        answer: "Marcus",
+        hint:
+          "Think about who had both the opportunity to remove the painting and something capable of concealing it.",
+        explanation:
+          "Marcus left before the theft was discovered, carrying a package large enough to conceal the painting. Olivia's handbag was too small, while Sophie never left the building."
+      },
+      {
+        title: "The Disappearing Diamond",
+        category: "CASE FILE #03 · HOTEL MYSTERY",
+        story:
+          "A diamond disappeared from a hotel suite at 8:30 PM. The suite's electronic lock records every entry. The owner confirms the diamond was still on the desk at 8:00 PM.",
+        clues: [
+          "The lock recorded exactly one entry between 8:00 PM and 8:30 PM.",
+          "Ava entered the suite at 7:45 PM and left at 7:50 PM.",
+          "Ben's keycard was used to enter the suite at 8:15 PM.",
+          "Chloe's keycard was not used that evening, and the hotel hallway camera showed her in the lobby from 8:00 PM to 8:30 PM."
+        ],
+        suspects: [
+          { name: "Ava", icon: "👩‍💼", detail: "Left at 7:50 PM" },
+          { name: "Ben", icon: "🕴️", detail: "Entered at 8:15 PM" },
+          { name: "Chloe", icon: "👩‍🦰", detail: "Seen in the lobby" }
+        ],
+        answer: "Ben",
+        hint:
+          "Compare the time the diamond was last seen with the electronic lock's entry record.",
+        explanation:
+          "Ben's keycard was used at 8:15 PM, inside the period when the diamond disappeared. Ava had already left, and Chloe was seen in the lobby throughout that period."
+      }
+    ];
+
+    let currentCase = 0;
+    let score = 0;
+    let solved = 0;
+    let answered = false;
+    let hintUsed = false;
+
+    const $ = (id) => document.getElementById(id);
+
+    function showSection(sectionId) {
+      ["welcome", "game", "finished"].forEach(id => {
+        $(id).classList.toggle("hidden", id !== sectionId);
+      });
+    }
+
+    function startGame() {
+      currentCase = 0;
+      score = 0;
+      solved = 0;
+      renderCase();
+      showSection("game");
+    }
+
+    function renderCase() {
+      const data = cases[currentCase];
+      answered = false;
+      hintUsed = false;
+
+      $("caseStat").textContent = `${currentCase + 1} / ${cases.length}`;
+      $("scoreStat").textContent = score;
+      $("solvedStat").textContent = `${solved} / ${cases.length}`;
+      $("progress").style.width = `${(currentCase / cases.length) * 100}%`;
+
+      $("caseCategory").textContent = data.category;
+      $("caseTitle").textContent = data.title;
+      $("caseStory").textContent = data.story;
+
+      const clues = $("clues");
+      clues.replaceChildren();
+
+      data.clues.forEach((text, index) => {
+        const item = document.createElement("div");
+        item.className = "clue";
+
+        const icon = document.createElement("span");
+        icon.className = "clue-icon";
+        icon.textContent = ["📌", "🔍", "🗒️", "🕯️"][index % 4];
+
+        const paragraph = document.createElement("p");
+        paragraph.textContent = text;
+
+        item.append(icon, paragraph);
+        clues.append(item);
+      });
+
+      const suspects = $("suspects");
+      suspects.replaceChildren();
+
+      data.suspects.forEach(suspect => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "suspect";
+        button.setAttribute("aria-label", `Accuse ${suspect.name}`);
+
+        const avatar = document.createElement("span");
+        avatar.className = "avatar";
+        avatar.textContent = suspect.icon;
+
+        const name = document.createElement("strong");
+        name.textContent = suspect.name;
+
+        const detail = document.createElement("small");
+        detail.textContent = suspect.detail;
+
+        button.append(avatar, name, detail);
+        button.addEventListener("click", () => chooseSuspect(suspect.name, button));
+        suspects.append(button);
+      });
+
+      $("hintBox").classList.add("hidden");
+      $("hintBox").textContent = "";
+      $("feedback").className = "feedback";
+      $("feedback").textContent = "";
+      $("hintBtn").disabled = false;
+      $("hintBtn").textContent = "💡 Reveal Hint";
+      $("nextBtn").classList.add("hidden");
+      $("progress").style.width = `${(currentCase / cases.length) * 100}%`;
+    }
+
+    function chooseSuspect(name, selectedButton) {
+      if (answered) return;
+
+      answered = true;
+      const data = cases[currentCase];
+      const isCorrect = name === data.answer;
+
+      if (isCorrect) {
+        score += hintUsed ? 50 : 100;
+        solved++;
+      }
+
+      document.querySelectorAll(".suspect").forEach(button => {
+        button.disabled = true;
+        const suspectName = button.querySelector("strong").textContent;
+
+        if (suspectName === data.answer) {
+          button.classList.add("correct");
+        } else if (button === selectedButton && !isCorrect) {
+          button.classList.add("wrong");
+        }
+      });
+
+      const feedback = $("feedback");
+      feedback.className = `feedback show ${isCorrect ? "good" : "bad"}`;
+
+      const heading = document.createElement("strong");
+      heading.textContent = isCorrect
+        ? `✓ Correct! ${hintUsed ? "+50 points" : "+100 points"}`
+        : `✗ Not quite! The culprit was ${data.answer}.`;
+
+      const explanation = document.createElement("p");
+      explanation.textContent = data.explanation;
+      explanation.style.margin = "0";
+
+      feedback.replaceChildren(heading, explanation);
+
+      $("scoreStat").textContent = score;
+      $("solvedStat").textContent = `${solved} / ${cases.length}`;
+      $("hintBtn").disabled = true;
+      $("nextBtn").classList.remove("hidden");
+      $("nextBtn").textContent =
+        currentCase === cases.length - 1 ? "See Final Results →" : "Next Case →";
+    }
+
+    function revealHint() {
+      if (answered || hintUsed) return;
+
+      hintUsed = true;
+      const box = $("hintBox");
+      box.textContent = `💡 Detective's Hint: ${cases[currentCase].hint}`;
+      box.classList.remove("hidden");
+      $("hintBtn").textContent = "Hint Revealed";
+      $("hintBtn").disabled = true;
+    }
+
+    function nextCase() {
+      if (!answered) return;
+
+      currentCase++;
+
+      if (currentCase >= cases.length) {
+        showResults();
+      } else {
+        renderCase();
+      }
+    }
+
+    function showResults() {
+      $("progress").style.width = "100%";
+      $("finalScore").textContent = `${score} / 300`;
+
+      if (solved === 3) {
+        $("endIcon").textContent = "🏆";
+        $("endTitle").textContent = "Master Detective!";
+        $("endMessage").textContent =
+          "Incredible work! You solved every case. Your attention to detail is outstanding.";
+      } else if (solved >= 2) {
+        $("endIcon").textContent = "🕵️";
+        $("endTitle").textContent = "Great Investigation!";
+        $("endMessage").textContent =
+          "You are becoming a skilled detective. Review the clues and try for a perfect score!";
+      } else {
+        $("endIcon").textContent = "🔎";
+        $("endTitle").textContent = "Keep Investigating!";
+        $("endMessage").textContent =
+          "Every detective learns from each case. Look carefully at the evidence and try again!";
+      }
+
+      showSection("finished");
+    }
+
+    $("startBtn").addEventListener("click", startGame);
+    $("hintBtn").addEventListener("click", revealHint);
+    $("nextBtn").addEventListener("click", nextCase);
+    $("restartBtn").addEventListener("click", startGame);
+  </script>
+</body>
+</html>

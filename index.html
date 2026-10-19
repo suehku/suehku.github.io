@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#fff3e9" />
+<title>Mochi Fruit Drop 🍉</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap');
+:root{--ink:#65515b;--pink:#f98caa;--cream:#fff9ef;--line:#f3cfcb}*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:'Nunito',system-ui,sans-serif;color:var(--ink)}
+body{background:radial-gradient(circle at 8% 12%,#fff7aa 0 10%,transparent 30%),radial-gradient(circle at 95% 3%,#ffd5dd 0 9%,transparent 30%),linear-gradient(155deg,#fff5e8,#ffeaf2 52%,#ecf8ff);display:flex;align-items:center;justify-content:center;padding:18px 10px 24px;overflow-x:hidden}
+.wrap{width:min(100%,510px)}.title{text-align:center;margin:0 0 7px;line-height:1.1;font-size:clamp(29px,7vw,39px);color:#e87993;letter-spacing:.3px;text-shadow:0 3px #fff}.subtitle{text-align:center;font-size:13px;color:#ad8c93;margin:0 0 13px}
+.panel{border:4px solid #fff;background:rgba(255,255,255,.72);box-shadow:0 12px 0 #efcbd0,0 18px 35px #d890a430;border-radius:28px;padding:13px 13px 16px}
+.stats{display:grid;grid-template-columns:1fr 1fr 1.15fr;gap:8px;margin-bottom:10px}.stat{background:#fffdf9;border:2px solid #ffe0db;border-radius:17px;min-height:64px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center}.stat span{font-size:12px;color:#b58d95}.stat strong{font-family:'Nunito',sans-serif;font-size:24px;color:#f0809b;line-height:1.25}.stat.next strong{font-family:'Nunito',sans-serif;font-size:14px;color:#8fae81}
+.game-shell{position:relative;border:5px solid #ebadb3;border-radius:18px 18px 25px 25px;overflow:hidden;background:linear-gradient(#fffcf9,#fff5e9);box-shadow:inset 0 0 0 3px #fff6f0;touch-action:none;user-select:none}
+canvas{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair}.game-shell:after{content:'';position:absolute;pointer-events:none;inset:0;border:3px solid #ffffff80;border-radius:13px 13px 20px 20px}
+.overlay{position:absolute;inset:0;background:#fff6f0dd;backdrop-filter:blur(5px);display:none;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:11px;padding:25px;z-index:4}.overlay.show{display:flex}.overlay .emoji{font-size:58px;filter:drop-shadow(0 5px 0 #f7cfcd)}.overlay h2{margin:0;color:#e87893;font-size:34px}.overlay p{margin:0;line-height:1.6;font-size:18px}
+button{border:none;font-family:inherit;cursor:pointer;transition:transform .12s,filter .12s}button:active{transform:translateY(3px) scale(.98)}.primary{background:#f88eaa;color:#fff;border:3px solid #fff;box-shadow:0 5px 0 #cf6d8a;border-radius:18px;padding:11px 24px;font-size:20px}.actions{display:flex;gap:9px;justify-content:center;margin-top:13px;flex-wrap:wrap}.actions button{background:#fff;border:2px solid #f5c9cc;border-radius:15px;padding:10px 17px;color:#b57889;font-size:16px;box-shadow:0 3px 0 #f3d9d5}.actions button:hover{filter:brightness(.98)}.actions button:focus-visible,.primary:focus-visible{outline:3px solid #9c9fe3;outline-offset:2px}.tips{text-align:center;font-size:13px;color:#a18b99;margin:15px 0 6px;line-height:1.6}.evolution{margin-top:12px;display:flex;align-items:center;justify-content:center;gap:3px;flex-wrap:wrap;font-size:18px}.evolution span{background:#fffaf8b8;border:1px solid #f8d9d3;border-radius:9px;padding:3px 5px}.foot{text-align:center;color:#bb91a1;font-size:11px;margin-top:12px}
+@media(max-width:390px){.panel{padding:9px}.stats{gap:5px}.stat{min-height:57px}.stat strong{font-size:21px}.title{font-size:29px}.evolution{font-size:15px}}
+@media(prefers-reduced-motion:reduce){button{transition:none}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1 class="title">🍑 Mochi Fruit Drop 🍉</h1>
+<p class="subtitle">Merge matching fruits and grow a giant watermelon!</p>
+<section class="panel" aria-label="Watermelon merging game">
+ <div class="stats"><div class="stat"><span>🍬 Score</span><strong id="score">0</strong></div><div class="stat"><span>🏆 Best Score</span><strong id="best">0</strong></div><div class="stat next"><span>🌸 Next Fruit</span><strong id="next">🍒 Cherry</strong></div></div>
+ <div class="game-shell"><canvas id="game" width="440" height="580" aria-label="Drop and merge fruit game board"></canvas><div id="overlay" class="overlay" role="dialog" aria-labelledby="gameover-title"><div class="emoji">🥺🍉</div><h2 id="gameover-title">Game Over!</h2><p id="final-score">Your score: 0</p><button id="again" class="primary">Play Again 💗</button></div></div>
+ <div class="actions"><button id="restart">↻ Restart</button><button id="sound" aria-pressed="true">♫ Sound On</button></div>
+ <p class="tips">🖱️ Move and click, or 📱 tap to drop a fruit!<br>Match two identical fruits to make a bigger one ✨</p>
+ <div class="evolution" aria-label="Fruit evolution"><span>🍒</span>→<span>🍓</span>→<span>🍇</span>→<span>🍊</span>→<span>🍋</span>→<span>🍑</span>→<span>🍎</span>→<span>🍐</span>→<span>🍈</span>→<span>🍉</span></div>
+</section><p class="foot">made with ♡ · play instantly in your browser</p>
+</main>
+<script>
+'use strict';
+(() => {
+ const c=document.getElementById('game'), ctx=c.getContext('2d');
+ const W=c.width,H=c.height,FLOOR=H-13,LEFT=12,RIGHT=W-12,DANGER=96;
+ const kinds=[
+  {name:'Cherry',emoji:'🍒',r:17,color:'#f96a86',light:'#ffb5c5',points:2},
+  {name:'Strawberry',emoji:'🍓',r:22,color:'#f77b91',light:'#ffd2d8',points:4},
+  {name:'Grape',emoji:'🍇',r:27,color:'#a99be5',light:'#d9d3ff',points:8},
+  {name:'Orange',emoji:'🍊',r:33,color:'#ffad65',light:'#ffe0ad',points:16},
+  {name:'Lemon',emoji:'🍋',r:39,color:'#f3d46b',light:'#fff2ae',points:32},
+  {name:'Peach',emoji:'🍑',r:46,color:'#ff9d9a',light:'#ffd6ca',points:64},
+  {name:'Apple',emoji:'🍎',r:53,color:'#f1767d',light:'#ffb4ae',points:128},
+  {name:'Pear',emoji:'🍐',r:61,color:'#c6da82',light:'#eafbba',points:256},
+  {name:'Melon',emoji:'🍈',r:69,color:'#99ce9b',light:'#d3ebbc',points:512},
+  {name:'Watermelon',emoji:'🍉',r:78,color:'#74bd87',light:'#bce8ac',points:1024}
+ ];
+ let balls=[],particles=[],score=0,best=0,current=0,next=0,aim=W/2,lastDrop=0,over=false,warningTime=0,anim=0,id=1,muted=false,lastTs=0;
+ const scoreEl=document.getElementById('score'),bestEl=document.getElementById('best'),nextEl=document.getElementById('next'),overlay=document.getElementById('overlay');
+ try{best=Number(localStorage.getItem('mallow-fruit-best')||0)||0;muted=localStorage.getItem('mallow-fruit-muted')==='true'}catch(e){}
+ bestEl.textContent=best.toLocaleString();
+ let audioCtx=null;
+ function playTone(freq=500,duration=.12,type='sine') {if(muted)return;try{audioCtx ||= new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.setValueAtTime(freq,audioCtx.currentTime);o.frequency.exponentialRampToValueAtTime(freq*1.26,audioCtx.currentTime+duration);g.gain.setValueAtTime(.065,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);o.connect(g).connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+duration)}catch(e){}}
+ function randFruit(){return Math.floor(Math.random()*5)}
+ function updateNext(){nextEl.textContent=kinds[next].emoji+' '+kinds[next].name}
+ function reset(){balls=[];particles=[];score=0;id=1;current=randFruit();next=randFruit();aim=W/2;lastDrop=0;over=false;warningTime=0;scoreEl.textContent='0';updateNext();overlay.classList.remove('show')}
+ function fruit(type,x,y,vy=0){const r=kinds[type].r;return{id:id++,type,x,y,vx:(Math.random()-.5)*.18,vy,r,mass:r*r,age:0,merging:false,angle:(Math.random()-.5)*.13}}
+ function drop(x){if(over||performance.now()-lastDrop<380)return;const r=kinds[current].r;x=Math.max(LEFT+r,Math.min(RIGHT-r,x));balls.push(fruit(current,x,55,0));current=next;next=randFruit();updateNext();lastDrop=performance.now();playTone(480,.06)}
+ function addPoints(pts){score+=pts;scoreEl.textContent=score.toLocaleString();if(score>best){best=score;bestEl.textContent=best.toLocaleString();try{localStorage.setItem('mallow-fruit-best',String(best))}catch(e){}}}
+ function burst(x,y,type){const k=kinds[type];for(let i=0;i<12;i++){const t=Math.random()*Math.PI*2,sp=2+Math.random()*4;particles.push({x,y,vx:Math.cos(t)*sp,vy:Math.sin(t)*sp-2,life:1,color:i%3===0?'#fff':k.color,r:2+Math.random()*4})}}
+ function merge(a,b){if(a.merging||b.merging||a.type!==b.type)return; a.merging=b.merging=true;let t=a.type,n=Math.min(kinds.length-1,t+1);const mass=a.mass+b.mass;const x=(a.x*a.mass+b.x*b.mass)/mass,y=(a.y*a.mass+b.y*b.mass)/mass;
+  balls=balls.filter(q=>q!==a&&q!==b);burst(x,y,n);addPoints(kinds[t].points);playTone(380+100*t,.15);if(t===kinds.length-1){addPoints(2048);playTone(900,.28);return}const f=fruit(n,Math.max(LEFT+kinds[n].r,Math.min(RIGHT-kinds[n].r,x)),Math.max(55,y));f.vx=(a.vx+b.vx)*.24;f.vy=(a.vy+b.vy)*.15-1.6;balls.push(f)
+ }
+ // Fixed-timestep arcade circle physics: gravity, wall/floor collision, and equal-size merging.
+ function physics(dt){const grav=.24*dt;for(const b of balls){b.age+=dt;b.vy+=grav;b.vx*=Math.pow(.997,dt);b.vy*=Math.pow(.999,dt);b.x+=b.vx*dt;b.y+=b.vy*dt;if(b.x-b.r<LEFT){b.x=LEFT+b.r;b.vx=Math.abs(b.vx)*.32}if(b.x+b.r>RIGHT){b.x=RIGHT-b.r;b.vx=-Math.abs(b.vx)*.32}if(b.y+b.r>FLOOR){b.y=FLOOR-b.r;b.vy=b.vy>0?-b.vy*.13:b.vy;b.vx*=.91;if(Math.abs(b.vy)<.18)b.vy=0}}
+  for(let iter=0;iter<3;iter++){let didMerge=false;for(let i=0;i<balls.length;i++){const a=balls[i];for(let j=i+1;j<balls.length;j++){const b=balls[j];const dx=b.x-a.x,dy=b.y-a.y,min=a.r+b.r,d2=dx*dx+dy*dy;if(d2>=min*min)continue;if(a.type===b.type){merge(a,b);didMerge=true;break}const dist=Math.max(.0001,Math.sqrt(d2)),nx=dx/dist,ny=dy/dist,overlap=min-dist,ma=a.mass,mb=b.mass,total=ma+mb;a.x-=nx*overlap*(mb/total)*.67;a.y-=ny*overlap*(mb/total)*.67;b.x+=nx*overlap*(ma/total)*.67;b.y+=ny*overlap*(ma/total)*.67;const rel=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;if(rel<0){const impulse=-(1+.12)*rel/(1/ma+1/mb);a.vx-=impulse*nx/ma;a.vy-=impulse*ny/ma;b.vx+=impulse*nx/mb;b.vy+=impulse*ny/mb}}if(didMerge)break}if(didMerge)break}
+  for(const b of balls){b.x=Math.max(LEFT+b.r,Math.min(RIGHT-b.r,b.x));if(b.y+b.r>FLOOR){b.y=FLOOR-b.r;if(b.vy>0)b.vy=0}}
+  const high=balls.some(b=>b.age>75&&b.y-b.r<DANGER-8&&Math.hypot(b.vx,b.vy)<2.1);warningTime=high?warningTime+dt:Math.max(0,warningTime-3*dt);if(warningTime>145){over=true;document.getElementById('final-score').textContent='Your score: '+score.toLocaleString();overlay.classList.add('show');playTone(230,.38)}
+  particles=particles.filter(p=>p.life>0);for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=.17*dt;p.life-=.028*dt}
+ }
+ function roundRect(x,y,w,h,r,fill){ctx.fillStyle=fill;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()}
+ function face(x,y,r,type){const eye=r*.085;const ey=-r*.035;ctx.fillStyle='#66505a';ctx.beginPath();ctx.ellipse(x-r*.25,y+ey,eye,eye*1.3,0,0,Math.PI*2);ctx.ellipse(x+r*.25,y+ey,eye,eye*1.3,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x-r*.27,y+ey-eye*.28,eye*.32,0,Math.PI*2);ctx.arc(x+r*.23,y+ey-eye*.28,eye*.32,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#8d5362';ctx.lineWidth=Math.max(1.4,r*.042);ctx.lineCap='round';ctx.beginPath();ctx.arc(x,y+r*.12,r*.13,.05*Math.PI,.95*Math.PI);ctx.stroke();ctx.fillStyle='#ff97a7a0';ctx.beginPath();ctx.ellipse(x-r*.43,y+r*.14,r*.14,r*.075,0,0,Math.PI*2);ctx.ellipse(x+r*.43,y+r*.14,r*.14,r*.075,0,0,Math.PI*2);ctx.fill()}
+ function drawFruit(x,y,type,alpha=1){const k=kinds[type],r=k.r;ctx.save();ctx.globalAlpha=alpha;ctx.shadowColor='#d09a9b60';ctx.shadowBlur=8;ctx.shadowOffsetY=4;const g=ctx.createRadialGradient(x-r*.3,y-r*.42,r*.08,x,y,r);g.addColorStop(0,k.light);g.addColorStop(.78,k.color);g.addColorStop(1,k.color);ctx.fillStyle=g;ctx.strokeStyle='#ffffffdd';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+ if(type===9){ctx.strokeStyle='#4fa16c';ctx.lineWidth=r*.075;for(let i=-2;i<=2;i++){const off=i*r*.31;const half=Math.sqrt(Math.max(0,r*r-off*off));ctx.beginPath();ctx.moveTo(x+off,y-half*.8);ctx.quadraticCurveTo(x+off+8,y,x+off,y+half*.8);ctx.stroke()}} else if(type===8){ctx.strokeStyle='#75ba82';ctx.lineWidth=1.4;for(let j=-2;j<=2;j++){ctx.beginPath();ctx.moveTo(x-r*.52,y+j*r*.22);ctx.lineTo(x+r*.52,y+j*r*.22);ctx.stroke()}}
+ // tiny leaf and stalk
+ if(type>=3){ctx.fillStyle='#79b88e';ctx.beginPath();ctx.ellipse(x+r*.08,y-r*.93,r*.25,r*.12,-.65,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#8ca47b';ctx.lineWidth=Math.max(2,r*.075);ctx.beginPath();ctx.moveTo(x,y-r*.8);ctx.lineTo(x-r*.02,y-r*.99);ctx.stroke()}
+ if(type===0){ctx.fillStyle='#e85171';ctx.beginPath();ctx.arc(x-r*.15,y-r*.17,r*.19,0,Math.PI*2);ctx.arc(x+r*.12,y-r*.17,r*.19,0,Math.PI*2);ctx.fill()}
+ ctx.fillStyle='#ffffff75';ctx.beginPath();ctx.ellipse(x-r*.35,y-r*.37,r*.21,r*.105,-.7,0,Math.PI*2);ctx.fill();face(x,y,r,type);ctx.restore()}
+ function draw(){ctx.clearRect(0,0,W,H);const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#fffdf6');sky.addColorStop(1,'#fff0e6');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#ffe4e8';for(let i=0;i<14;i++){let x=(i*103+27)%W,y=(i*141+47)%H;ctx.globalAlpha=.45;ctx.beginPath();ctx.arc(x,y,2+(i%3),0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;
+  ctx.save();ctx.setLineDash([9,8]);ctx.strokeStyle=warningTime>30?'#f26e80':'#f8c5c6';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(LEFT,DANGER);ctx.lineTo(RIGHT,DANGER);ctx.stroke();ctx.restore();roundRect(18,10,204,31,13,'#fff5f1d9');ctx.fillStyle='#c69ba1';ctx.font='15px Nunito,sans-serif';ctx.fillText('☁ Keep fruits below!',29,31);
+  roundRect(LEFT,FLOOR,RIGHT-LEFT,H-FLOOR,6,'#e7b7a7');ctx.fillStyle='#fff1e3';ctx.fillRect(LEFT,FLOOR-3,RIGHT-LEFT,3);
+  if(!over){const r=kinds[current].r;const x=Math.max(LEFT+r,Math.min(RIGHT-r,aim));ctx.save();ctx.strokeStyle='#f9bbc6';ctx.setLineDash([5,7]);ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x,55+r);ctx.lineTo(x,FLOOR);ctx.stroke();ctx.restore();drawFruit(x,56,current,.8)}
+  balls.sort((a,b)=>a.y-b.y);for(const b of balls){drawFruit(b.x,b.y,b.type)}for(const p of particles){ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;
+  if(warningTime>18){ctx.fillStyle='#e26980';ctx.font='19px Nunito,sans-serif';ctx.textAlign='center';ctx.fillText('Careful! Too many fruits!',W/2,79);ctx.textAlign='start'}
+ }
+ function frame(ts){const elapsed=Math.min(40,ts-(lastTs||ts));lastTs=ts;if(!over){anim+=elapsed;let count=0;while(anim>=1000/60&&count++<3){physics(1);anim-=1000/60}}draw();requestAnimationFrame(frame)}
+ function localX(e){const r=c.getBoundingClientRect();return(e.clientX-r.left)*W/r.width}
+ c.addEventListener('pointermove',e=>{aim=localX(e)});c.addEventListener('pointerdown',e=>{if(e.cancelable)e.preventDefault();aim=localX(e);drop(aim)});
+ window.addEventListener('keydown',e=>{if(e.code==='ArrowLeft'){e.preventDefault();aim-=18}else if(e.code==='ArrowRight'){e.preventDefault();aim+=18}else if(e.code==='Space'||e.code==='ArrowDown'){e.preventDefault();if(!e.repeat)drop(aim)}});
+ document.getElementById('restart').addEventListener('click',reset);document.getElementById('again').addEventListener('click',reset);
+ document.getElementById('sound').addEventListener('click',()=>{muted=!muted;const b=document.getElementById('sound');b.textContent=muted?'♫ Sound Off':'♫ Sound On';b.setAttribute('aria-pressed',String(!muted));try{localStorage.setItem('mallow-fruit-muted',String(muted))}catch(e){}});
+ if(muted){const b=document.getElementById('sound');b.textContent='♫ Sound Off';b.setAttribute('aria-pressed','false')}
+ reset();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
